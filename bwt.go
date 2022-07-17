@@ -10,15 +10,14 @@ import (
 )
 
 const stx = "\002"
-const ext = "\003"
 
 func Bwt(str string) (string, error) {
-	if strings.Contains(str, stx) || strings.Contains(str, ext) {
-		err := fmt.Errorf("input string cannot contain STX and ETX characters")
+	if strings.Contains(str, stx) {
+		err := fmt.Errorf("input string cannot contain STX character")
 		return "", err
 	}
 
-	str = stx + str + ext
+	str = stx + str
 	size := len(str)
 	matrix := graphblas.NewDenseMatrix[rune](size, size)
 
@@ -48,8 +47,8 @@ func Ibwt(str string) string {
 
 	first := matrix.RowsAt(0)
 	result := graphblas.String(context.Background(), first)
-	if strings.HasSuffix(result, ext) {
-		return result[1 : size-1]
+	if strings.HasPrefix(result, stx) {
+		return result[1:size]
 	}
 
 	return ""

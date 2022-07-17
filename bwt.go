@@ -1,9 +1,12 @@
 package bwt
 
 import (
+	"context"
 	"fmt"
-	"sort"
 	"strings"
+
+	"github.com/rossmerr/graphblas"
+	"github.com/rossmerr/graphblas/sort"
 )
 
 const stx = "\002"
@@ -17,34 +20,37 @@ func Bwt(str string) (string, error) {
 
 	str = stx + str + ext
 	size := len(str)
-	table := make([]string, size)
+	matrix := graphblas.NewDenseMatrix[rune](size, size)
+
 	for i := 0; i < size; i++ {
-		table[i] = str[i:] + str[:i]
+		tmp := str[i:] + str[:i]
+		for j := 0; j < size; j++ {
+			matrix.Set(i, j, rune(tmp[j]))
+		}
 	}
 
-	sort.Strings(table)
-
-	lastBytes := make([]byte, size)
-	for i := 0; i < size; i++ {
-		lastBytes[i] = table[i][size-1]
-	}
-	return string(lastBytes), nil
-
+	sorted := sort.BubbleRow(context.Background(), matrix)
+	last := sorted.ColumnsAt(size - 1)
+	return graphblas.String(context.Background(), last), nil
 }
 
 func Ibwt(str string) string {
 	size := len(str)
-	table := make([]string, size)
-	for range table {
-		for i := 0; i < size; i++ {
-			table[i] = str[i:i+1] + table[i]
+	matrix := graphblas.NewDenseMatrix[rune](size, size)
+	for i := size - 1; i >= 0; i-- {
+		for j := 0; j < size; j++ {
+			tmp := str[j : j+1][0]
+			matrix.Set(j, i, rune(tmp))
 		}
-		sort.Strings(table)
+
+		matrix = sort.BubbleRow(context.Background(), matrix).(*graphblas.DenseMatrix[rune])
 	}
-	for _, row := range table {
-		if strings.HasSuffix(row, ext) {
-			return row[1 : size-1]
-		}
+
+	first := matrix.RowsAt(0)
+	result := graphblas.String(context.Background(), first)
+	if strings.HasSuffix(result, ext) {
+		return result[1 : size-1]
 	}
+
 	return ""
 }

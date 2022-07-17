@@ -1,55 +1,53 @@
 package bwt
 
 import (
-	"context"
 	"fmt"
+	"sort"
 	"strings"
-
-	"github.com/rossmerr/graphblas"
-	"github.com/rossmerr/graphblas/sort"
 )
 
-const stx = "\002"
+const ext = "\003"
 
 func Bwt(str string) (string, error) {
-	if strings.Contains(str, stx) {
-		err := fmt.Errorf("input string cannot contain STX character")
+	if strings.Contains(str, ext) {
+		err := fmt.Errorf("input string cannot contain EXT character")
 		return "", err
 	}
 
-	str = stx + str
+	str = str + ext
 	size := len(str)
-	matrix := graphblas.NewDenseMatrix[rune](size, size)
 
+	suffixes := make([]string, size)
 	for i := 0; i < size; i++ {
-		tmp := str[i:] + str[:i]
-		for j := 0; j < size; j++ {
-			matrix.Set(i, j, rune(tmp[j]))
-		}
+		suffixes[i] = str[i:]
 	}
 
-	sorted := sort.BubbleRow(context.Background(), matrix)
-	last := sorted.ColumnsAt(size - 1)
-	return graphblas.String(context.Background(), last), nil
+	sort.Strings(suffixes)
+
+	result := make([]rune, size)
+	for i := 0; i < size; i++ {
+		sa := size - len(suffixes[i])
+		mod := (sa + size - 1) % size
+		result[i] = rune(str[mod])
+	}
+
+	return string(result), nil
 }
 
 func Ibwt(str string) string {
 	size := len(str)
-	matrix := graphblas.NewDenseMatrix[rune](size, size)
-	for i := size - 1; i >= 0; i-- {
-		for j := 0; j < size; j++ {
-			tmp := str[j : j+1][0]
-			matrix.Set(j, i, rune(tmp))
+	table := make([]string, size)
+	for range table {
+		for i := 0; i < size; i++ {
+			table[i] = str[i:i+1] + table[i]
 		}
-
-		matrix = sort.BubbleRow(context.Background(), matrix).(*graphblas.DenseMatrix[rune])
+		sort.Strings(table)
 	}
-
-	first := matrix.RowsAt(0)
-	result := graphblas.String(context.Background(), first)
-	if strings.HasPrefix(result, stx) {
-		return result[1:size]
+	for _, row := range table {
+		if strings.HasPrefix(row, ext) {
+			return row[1:]
+		}
 	}
-
 	return ""
+
 }

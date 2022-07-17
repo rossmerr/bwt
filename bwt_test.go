@@ -17,7 +17,7 @@ func TestBwt(t *testing.T) {
 		{
 			name: "banana",
 			str:  "banana",
-			want: "annbaa",
+			want: "annbaa",
 		},
 	}
 	for _, tt := range tests {
@@ -42,7 +42,7 @@ func TestIbwt(t *testing.T) {
 	}{
 		{
 			name: "banana",
-			str: "annbaa",
+			str: "annbaa",
 			want: "banana",
 		}}
 	for _, tt := range tests {

@@ -67,9 +67,9 @@ func (s RankedString) String() string {
 	str := make([]string, len(s))
 
 	for i, r := range s {
-		str[i] = fmt.Sprintf("{%v, %v}", string(r.Value), r.Rank)
+		str[i] = r.Value
 	}
-	return "[" + strings.Join(str, " ") + "]"
+	return strings.Join(str, "")
 }
 
 func BwtRank(str string) (RankedString, error) {

@@ -42,7 +42,7 @@ func TestIbwt(t *testing.T) {
 	}{
 		{
 			name: "banana",
-			str: "annbaa",
+			str:  "annbaa",
 			want: "banana",
 		}}
 	for _, tt := range tests {
@@ -50,6 +50,61 @@ func TestIbwt(t *testing.T) {
 			if got := bwt.Ibwt(tt.str); got != tt.want {
 				t.Errorf("Ibwt() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestBwtRanked(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		str     string
+		want    bwt.RankedString
+		wantErr bool
+	}{
+		{
+			name: "banana ranked",
+			str:  "abaaba",
+			want: []bwt.RuneRank{
+				{
+					Value: "a",
+					Rank:  0,
+				},
+				{
+					Value: "b",
+					Rank:  0,
+				}, {
+					Value: "b",
+					Rank:  1,
+				}, {
+					Value: "a",
+					Rank:  1,
+				}, {
+					Value: "",
+					Rank:  0,
+				}, {
+					Value: "a",
+					Rank:  2,
+				}, {
+					Value: "a",
+					Rank:  3,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := bwt.BwtRank(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			for i := 0; i < len(tt.want); i++ {
+				if got[i] != tt.want[i] {
+					t.Errorf("BwtRank() %v, = %v, want %v", i, got[i], tt.want[i])
+				}
+			}
+
 		})
 	}
 }

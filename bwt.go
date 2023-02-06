@@ -51,3 +51,63 @@ func Ibwt(str string) string {
 	return ""
 
 }
+
+type RuneRank struct {
+	Value string
+	Rank  int
+}
+
+type RankedString []RuneRank
+
+func (p RankedString) Len() int           { return len(p) }
+func (p RankedString) Less(i, j int) bool { return p[i].Value < p[j].Value }
+func (p RankedString) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+func (s RankedString) String() string {
+	str := make([]string, len(s))
+
+	for i, r := range s {
+		str[i] = fmt.Sprintf("{%v, %v}", string(r.Value), r.Rank)
+	}
+	return "[" + strings.Join(str, " ") + "]"
+}
+
+func BwtRank(str string) (RankedString, error) {
+	size := len(str) + 1
+
+	result := make(RankedString, size)
+
+	if strings.Contains(str, ext) {
+		err := fmt.Errorf("input string cannot contain EXT character")
+		return result, err
+	}
+
+	str = str + ext
+
+	suffixes := make(RankedString, size)
+	rank := map[byte]int{}
+
+	for i := 0; i < size; i++ {
+		s := str[i:]
+		suffixes[i].Value = s
+	}
+
+	sort.Sort(suffixes)
+
+	for i := 0; i < size; i++ {
+		sa := size - len(suffixes[i].Value)
+		mod := (sa + size - 1) % size
+		r := str[mod]
+		result[i].Value = string(r)
+
+		if _, ok := rank[r]; ok {
+			rank[r] = rank[r] + 1
+		} else {
+			rank[r] = 0
+		}
+
+		result[i].Rank = rank[r]
+	}
+
+	return result, nil
+}

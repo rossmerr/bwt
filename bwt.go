@@ -53,23 +53,19 @@ func Ibwt(str string) string {
 }
 
 type RuneRank struct {
-	Value string
+	Value rune
 	Rank  int
 }
 
 type RankedString []RuneRank
 
-func (p RankedString) Len() int           { return len(p) }
-func (p RankedString) Less(i, j int) bool { return p[i].Value < p[j].Value }
-func (p RankedString) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
 func (s RankedString) String() string {
-	str := make([]string, len(s))
+	str := make([]rune, len(s))
 
 	for i, r := range s {
 		str[i] = r.Value
 	}
-	return strings.Join(str, "")
+	return string(str)
 }
 
 func BwtRank(str string) (RankedString, error) {
@@ -84,21 +80,20 @@ func BwtRank(str string) (RankedString, error) {
 
 	str = str + ext
 
-	suffixes := make(RankedString, size)
 	rank := map[byte]int{}
 
+	suffixes := make([]string, size)
 	for i := 0; i < size; i++ {
-		s := str[i:]
-		suffixes[i].Value = s
+		suffixes[i] = str[i:]
 	}
 
-	sort.Sort(suffixes)
+	sort.Strings(suffixes)
 
 	for i := 0; i < size; i++ {
-		sa := size - len(suffixes[i].Value)
+		sa := size - len(suffixes[i])
 		mod := (sa + size - 1) % size
 		r := str[mod]
-		result[i].Value = string(r)
+		result[i].Value = rune(r)
 
 		if _, ok := rank[r]; ok {
 			rank[r] = rank[r] + 1

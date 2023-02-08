@@ -67,26 +67,26 @@ func TestBwtRanked(t *testing.T) {
 			str:  "abaaba",
 			want: []bwt.RuneRank{
 				{
-					Value: "a",
+					Value: 'a',
 					Rank:  0,
 				},
 				{
-					Value: "b",
+					Value: 'b',
 					Rank:  0,
 				}, {
-					Value: "b",
+					Value: 'b',
 					Rank:  1,
 				}, {
-					Value: "a",
+					Value: 'a',
 					Rank:  1,
 				}, {
-					Value: "",
+					Value: '',
 					Rank:  0,
 				}, {
-					Value: "a",
+					Value: 'a',
 					Rank:  2,
 				}, {
-					Value: "a",
+					Value: 'a',
 					Rank:  3,
 				},
 			},

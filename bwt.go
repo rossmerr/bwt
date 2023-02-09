@@ -9,9 +9,14 @@ import (
 const ext = "\003"
 
 func Bwt(str string) (string, error) {
+	_, result, err := BwtFirstLast(str)
+	return result, err
+}
+
+func BwtFirstLast(str string) (string, string, error) {
 	if strings.Contains(str, ext) {
 		err := fmt.Errorf("input string cannot contain EXT character")
-		return "", err
+		return "", "", err
 	}
 
 	str = str + ext
@@ -24,14 +29,16 @@ func Bwt(str string) (string, error) {
 
 	sort.Strings(suffixes)
 
-	result := make([]rune, size)
+	first := make([]rune, size)
+	last := make([]rune, size)
 	for i := 0; i < size; i++ {
+		first[i] = rune(suffixes[i][0])
 		sa := size - len(suffixes[i])
 		mod := (sa + size - 1) % size
-		result[i] = rune(str[mod])
+		last[i] = rune(str[mod])
 	}
 
-	return string(result), nil
+	return string(first), string(last), nil
 }
 
 func Ibwt(str string) string {

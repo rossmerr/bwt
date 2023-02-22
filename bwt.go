@@ -9,14 +9,20 @@ import (
 const ext = "\003"
 
 func Bwt(str string) (string, error) {
-	_, result, err := BwtFirstLast(str)
-	return result, err
+	_, last, _, err := BwtFirstLastSuffix(str)
+	return last, err
 }
 
 func BwtFirstLast(str string) (string, string, error) {
+	first, last, _, err := BwtFirstLastSuffix(str)
+	return first, last, err
+}
+
+func BwtFirstLastSuffix(str string) (string, string, []int, error) {
+	sa := []int{}
 	if strings.Contains(str, ext) {
 		err := fmt.Errorf("input string cannot contain EXT character")
-		return "", "", err
+		return "", "", sa, err
 	}
 
 	str = str + ext
@@ -33,12 +39,13 @@ func BwtFirstLast(str string) (string, string, error) {
 	last := make([]rune, size)
 	for i := 0; i < size; i++ {
 		first[i] = rune(suffixes[i][0])
-		sa := size - len(suffixes[i])
-		mod := (sa + size - 1) % size
+		s := size - len(suffixes[i])
+		mod := (s + size - 1) % size
 		last[i] = rune(str[mod])
+		sa = append(sa, s)
 	}
 
-	return string(first), string(last), nil
+	return string(first), string(last), sa, nil
 }
 
 func Ibwt(str string) string {
@@ -57,59 +64,4 @@ func Ibwt(str string) string {
 	}
 	return ""
 
-}
-
-type RuneRank struct {
-	Value rune
-	Rank  int
-}
-
-type RankedString []RuneRank
-
-func (s RankedString) String() string {
-	str := make([]rune, len(s))
-
-	for i, r := range s {
-		str[i] = r.Value
-	}
-	return string(str)
-}
-
-func BwtRank(str string) (RankedString, error) {
-	size := len(str) + 1
-
-	result := make(RankedString, size)
-
-	if strings.Contains(str, ext) {
-		err := fmt.Errorf("input string cannot contain EXT character")
-		return result, err
-	}
-
-	str = str + ext
-
-	rank := map[byte]int{}
-
-	suffixes := make([]string, size)
-	for i := 0; i < size; i++ {
-		suffixes[i] = str[i:]
-	}
-
-	sort.Strings(suffixes)
-
-	for i := 0; i < size; i++ {
-		sa := size - len(suffixes[i])
-		mod := (sa + size - 1) % size
-		r := str[mod]
-		result[i].Value = rune(r)
-
-		if _, ok := rank[r]; ok {
-			rank[r] = rank[r] + 1
-		} else {
-			rank[r] = 0
-		}
-
-		result[i].Rank = rank[r]
-	}
-
-	return result, nil
 }

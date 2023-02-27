@@ -61,21 +61,34 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 		name string
 		str  string
 		want string
-		sa   []int
+		sa   bwt.Suffix
 	}{
 		{
 			name: "banana",
 			str:  "banana",
 			want: "annbaa",
-			sa:   []int{6, 5, 3, 1, 0, 4, 2},
+			sa: func() bwt.Suffix {
+				sa := bwt.NewSuffix[bwt.SuffixArray]()
+				sa.Append(6)
+				sa.Append(5)
+				sa.Append(3)
+				sa.Append(1)
+				sa.Append(0)
+				sa.Append(4)
+				sa.Append(2)
+				return sa
+			}(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, sa, _ := bwt.BwtFirstLastSuffix(tt.str)
+			_, last, sa, _ := bwt.BwtFirstLastSuffix[bwt.SuffixArray](tt.str)
 
+			if !reflect.DeepEqual(last, tt.want) {
+				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.want)
+			}
 			if !reflect.DeepEqual(sa, tt.sa) {
-				t.Errorf("BwtFirstLastSuffix() = %v, want %v", sa, tt.want)
+				t.Errorf("BwtFirstLastSuffix() = %v, want %v", sa, tt.sa)
 			}
 		})
 	}

@@ -143,18 +143,39 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 func TestBwtFirstLastSampleSuffix(t *testing.T) {
 
 	tests := []struct {
-		name    string
-		str     string
-		first   string
-		last    string
-		sa      bwt.Suffix
-		wantErr bool
+		name        string
+		str         string
+		first       string
+		last        string
+		sa          bwt.Suffix
+		compression int
+		wantErr     bool
 	}{
 		{
-			name:  "abaaba",
-			str:   "abaaba",
-			first: "aaaabb",
-			last:  "abbaaa",
+			name:        "abaaba",
+			str:         "abaaba",
+			first:       "aaaabb",
+			last:        "abbaaa",
+			compression: 2,
+			sa: func() bwt.Suffix {
+
+				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+				sa.Set(0, 6)
+				sa.Set(1, 5)
+				sa.Set(2, 2)
+				sa.Set(3, 3)
+				sa.Set(4, 0)
+				sa.Set(5, 4)
+				sa.Set(6, 1)
+				return sa
+			}(),
+		},
+		{
+			name:        "abaaba",
+			str:         "abaaba",
+			first:       "aaaabb",
+			last:        "abbaaa",
+			compression: 3,
 			sa: func() bwt.Suffix {
 
 				sa := bwt.NewSuffix[bwt.SuffixArray](7)
@@ -171,7 +192,7 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SampleSuffixArray](tt.str, bwt.WithCompression(3))
+			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SampleSuffixArray](tt.str, bwt.WithCompression(tt.compression))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -182,7 +203,7 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 			if !reflect.DeepEqual(last, tt.last) {
 				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
 			}
-			for i := 0; i < 7; i += 3 {
+			for i := 0; i < 7; i += tt.compression {
 				r, _ := tt.sa.Get(i)
 				result, _ := sa.Get(i)
 				if !reflect.DeepEqual(r, result) {

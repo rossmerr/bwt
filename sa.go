@@ -80,22 +80,11 @@ func (s *SampleSuffixArray) Get(index int) (int, bool) {
 	}
 
 	if index%s.opts.mod == 0 {
-		i := index / s.size
+		i := index / s.opts.mod
 		return s.sa[i], true
 	}
 
 	return 0, false
-}
-
-func (s *SampleSuffixArray) get(index, count int) int {
-	if index%s.opts.mod == 0 {
-		i := index / s.size
-		return s.sa[i] - count
-	}
-
-	index++
-	count++
-	return s.get(index, count)
 }
 
 func (s *SampleSuffixArray) Set(index, value int) {
@@ -104,7 +93,7 @@ func (s *SampleSuffixArray) Set(index, value int) {
 	}
 
 	if index%s.opts.mod == 0 {
-		i := index / s.size
+		i := index / s.opts.mod
 		s.sa[i] = value
 	}
 }

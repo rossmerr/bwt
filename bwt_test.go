@@ -55,40 +55,139 @@ func TestIbwt(t *testing.T) {
 	}
 }
 
+func TestBwtFirstLast(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		str     string
+		first   string
+		last    string
+		wantErr bool
+	}{
+		{
+			name:  "abaaba",
+			str:   "abaaba",
+			first: "aaaabb",
+			last:  "abbaaa",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			first, last, err := bwt.BwtFirstLast(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if first != tt.first {
+				t.Errorf("Bwt() = %v, want %v", first, tt.first)
+			}
+			if last != tt.last {
+				t.Errorf("Bwt() = %v, want %v", last, tt.last)
+			}
+		})
+	}
+}
+
 func TestBwtFirstLastSuffix(t *testing.T) {
 
 	tests := []struct {
-		name string
-		str  string
-		want string
-		sa   bwt.Suffix
+		name    string
+		str     string
+		first   string
+		last    string
+		sa      bwt.Suffix
+		wantErr bool
 	}{
 		{
-			name: "banana",
-			str:  "banana",
-			want: "annbaa",
+			name:  "abaaba",
+			str:   "abaaba",
+			first: "aaaabb",
+			last:  "abbaaa",
 			sa: func() bwt.Suffix {
-				sa := bwt.NewSuffix[bwt.SuffixArray]()
-				sa.Append(6)
-				sa.Append(5)
-				sa.Append(3)
-				sa.Append(1)
-				sa.Append(0)
-				sa.Append(4)
-				sa.Append(2)
+				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+				sa.Set(0, 6)
+				sa.Set(1, 5)
+				sa.Set(2, 2)
+				sa.Set(3, 3)
+				sa.Set(4, 0)
+				sa.Set(5, 4)
+				sa.Set(6, 1)
 				return sa
 			}(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, last, sa, _ := bwt.BwtFirstLastSuffix[bwt.SuffixArray](tt.str)
-
-			if !reflect.DeepEqual(last, tt.want) {
-				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.want)
+			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SuffixArray](tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if !reflect.DeepEqual(sa, tt.sa) {
-				t.Errorf("BwtFirstLastSuffix() = %v, want %v", sa, tt.sa)
+			if first != tt.first {
+				t.Errorf("Bwt() = %v, want %v", first, tt.first)
+			}
+			if !reflect.DeepEqual(last, tt.last) {
+				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
+			}
+			for i := 0; i < 7; i++ {
+				r, _ := tt.sa.Get(i)
+				result, _ := sa.Get(i)
+				if !reflect.DeepEqual(r, result) {
+					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
+				}
+			}
+		})
+	}
+}
+
+func TestBwtFirstLastSampleSuffix(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		str     string
+		first   string
+		last    string
+		sa      bwt.Suffix
+		wantErr bool
+	}{
+		{
+			name:  "abaaba",
+			str:   "abaaba",
+			first: "aaaabb",
+			last:  "abbaaa",
+			sa: func() bwt.Suffix {
+
+				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+				sa.Set(0, 6)
+				sa.Set(1, 5)
+				sa.Set(2, 2)
+				sa.Set(3, 3)
+				sa.Set(4, 0)
+				sa.Set(5, 4)
+				sa.Set(6, 1)
+				return sa
+			}(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SampleSuffixArray](tt.str, bwt.WithCompression(3))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if first != tt.first {
+				t.Errorf("Bwt() = %v, want %v", first, tt.first)
+			}
+			if !reflect.DeepEqual(last, tt.last) {
+				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
+			}
+			for i := 0; i < 7; i += 3 {
+				r, _ := tt.sa.Get(i)
+				result, _ := sa.Get(i)
+				if !reflect.DeepEqual(r, result) {
+					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
+				}
 			}
 		})
 	}

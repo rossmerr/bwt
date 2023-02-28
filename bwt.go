@@ -12,9 +12,9 @@ func Bwt(str string) (string, error) {
 	appendFirst := func(i int, r rune) {
 	}
 
-	appendSA := func(s int) {
+	set := func(s, o int) {
 	}
-	last, err := bwtFirstLastSuffix(str, appendFirst, appendSA)
+	last, err := bwtFirstLastSuffix(str, appendFirst, set)
 	return last, err
 }
 
@@ -26,26 +26,29 @@ func BwtFirstLast(str string) (string, string, error) {
 		first[i] = r
 	}
 
-	appendSA := func(s int) {
+	set := func(s, o int) {
 	}
-	last, err := bwtFirstLastSuffix(str, appendFirst, appendSA)
+	last, err := bwtFirstLastSuffix(str, appendFirst, set)
 	return string(first), last, err
 }
 
-func BwtFirstLastSuffix[T SuffixConstraints](str string) (string, string, Suffix, error) {
-	sa := NewSuffix[T]()
+func BwtFirstLastSuffix[T SuffixConstraints](str string, options ...func(*OptionsSuffix)) (string, string, Suffix, error) {
+
 	size := len(str + ext)
+
+	sa := NewSuffix[T](size, options...)
+
 	first := make([]rune, size)
 
 	appendFirst := func(i int, r rune) {
 		first[i] = r
 	}
 
-	last, err := bwtFirstLastSuffix(str, appendFirst, sa.Append)
+	last, err := bwtFirstLastSuffix(str, appendFirst, sa.Set)
 	return string(first), string(last), sa, err
 }
 
-func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), appendSA func(s int)) (string, error) {
+func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(index, value int)) (string, error) {
 	if strings.Contains(str, ext) {
 		err := fmt.Errorf("input string cannot contain EXT character")
 		return "", err
@@ -67,7 +70,7 @@ func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), appendSA fu
 		s := size - len(suffixes[i])
 		mod := (s + size - 1) % size
 		last[i] = rune(str[mod])
-		appendSA(s)
+		set(i, s)
 	}
 
 	return string(last), nil

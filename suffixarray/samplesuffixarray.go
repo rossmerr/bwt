@@ -21,7 +21,7 @@ func (s *SampleSuffixArray) get(index, count int) int {
 
 	if index%s.opts.mod == 0 {
 		i := index / s.opts.mod
-		return s.sa[i] + count
+		return s.sa[i] - count
 	}
 
 	return 0

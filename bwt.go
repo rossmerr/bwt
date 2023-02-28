@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/rossmerr/bwt/suffixarray"
 )
 
 const ext = "\003"
@@ -32,11 +34,11 @@ func BwtFirstLast(str string) (string, string, error) {
 	return string(first), last, err
 }
 
-func BwtFirstLastSuffix[T SuffixConstraints](str string, options ...func(*OptionsSuffix)) (string, string, Suffix, error) {
+func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...func(*suffixarray.OptionsSuffix)) (string, string, suffixarray.Suffix, error) {
 
 	size := len(str + ext)
 
-	sa := NewSuffix[T](size, options...)
+	sa := suffixarray.NewSuffix[T](size, options...)
 
 	first := make([]rune, size)
 

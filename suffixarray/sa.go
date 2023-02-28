@@ -1,4 +1,4 @@
-package bwt
+package suffixarray
 
 import (
 	"fmt"

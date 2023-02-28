@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/rossmerr/bwt"
+	"github.com/rossmerr/bwt/suffixarray"
 )
 
 func TestBwt(t *testing.T) {
@@ -95,7 +96,7 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 		str     string
 		first   string
 		last    string
-		sa      bwt.Suffix
+		sa      suffixarray.Suffix
 		wantErr bool
 	}{
 		{
@@ -103,8 +104,8 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 			str:   "abaaba",
 			first: "aaaabb",
 			last:  "abbaaa",
-			sa: func() bwt.Suffix {
-				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+			sa: func() suffixarray.Suffix {
+				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
 				sa.Set(0, 6)
 				sa.Set(1, 5)
 				sa.Set(2, 2)
@@ -118,7 +119,7 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SuffixArray](tt.str)
+			first, last, sa, err := bwt.BwtFirstLastSuffix[suffixarray.SuffixArray](tt.str)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -147,7 +148,7 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 		str         string
 		first       string
 		last        string
-		sa          bwt.Suffix
+		sa          suffixarray.Suffix
 		compression int
 		wantErr     bool
 	}{
@@ -157,9 +158,9 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 			first:       "aaaabb",
 			last:        "abbaaa",
 			compression: 2,
-			sa: func() bwt.Suffix {
+			sa: func() suffixarray.Suffix {
 
-				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
 				sa.Set(0, 6)
 				sa.Set(1, 5)
 				sa.Set(2, 2)
@@ -176,9 +177,9 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 			first:       "aaaabb",
 			last:        "abbaaa",
 			compression: 3,
-			sa: func() bwt.Suffix {
+			sa: func() suffixarray.Suffix {
 
-				sa := bwt.NewSuffix[bwt.SuffixArray](7)
+				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
 				sa.Set(0, 6)
 				sa.Set(1, 5)
 				sa.Set(2, 2)
@@ -192,7 +193,7 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			first, last, sa, err := bwt.BwtFirstLastSuffix[bwt.SampleSuffixArray](tt.str, bwt.WithCompression(tt.compression))
+			first, last, sa, err := bwt.BwtFirstLastSuffix[suffixarray.SampleSuffixArray](tt.str, suffixarray.WithCompression(tt.compression))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
 				return

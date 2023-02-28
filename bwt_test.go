@@ -131,8 +131,8 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
 			}
 			for i := 0; i < 7; i++ {
-				r, _ := tt.sa.Get(i)
-				result, _ := sa.Get(i)
+				r := tt.sa.Get(i)
+				result := sa.Get(i)
 				if !reflect.DeepEqual(r, result) {
 					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
 				}
@@ -205,8 +205,8 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
 			}
 			for i := 0; i < 7; i += tt.compression {
-				r, _ := tt.sa.Get(i)
-				result, _ := sa.Get(i)
+				r := tt.sa.Get(i)
+				result := sa.Get(i)
 				if !reflect.DeepEqual(r, result) {
 					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
 				}

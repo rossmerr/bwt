@@ -21,6 +21,11 @@ func TestBwt(t *testing.T) {
 			str:  "banana",
 			want: "annbaa",
 		},
+		{
+			name: "quick fox",
+			str:  "The quick brown fox jumps over the lazy dog",
+			want: "gkynxeserl i hhv otTu c uwd rfm ebp qjoooza",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -71,6 +76,12 @@ func TestBwtFirstLast(t *testing.T) {
 			first: "aaaabb",
 			last:  "abbaaa",
 		},
+		{
+			name:  "quick fox",
+			str:   "The quick brown fox jumps over the lazy dog",
+			first: "        Tabcdeeefghhijklmnoooopqrrstuuvwxyz",
+			last:  "gkynxeserl i hhv otTu c uwd rfm ebp qjoooza",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -94,16 +105,16 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 	tests := []struct {
 		name    string
 		str     string
-		first   string
-		last    string
+		first   []rune
+		last    []rune
 		sa      suffixarray.Suffix
 		wantErr bool
 	}{
 		{
 			name:  "abaaba",
 			str:   "abaaba",
-			first: "aaaabb",
-			last:  "abbaaa",
+			first: []rune("aaaabb"),
+			last:  []rune("abbaaa"),
 			sa: func() suffixarray.Suffix {
 				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
 				sa.Set(0, 6)
@@ -124,7 +135,7 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if first != tt.first {
+			if string(first) != string(tt.first) {
 				t.Errorf("Bwt() = %v, want %v", first, tt.first)
 			}
 			if !reflect.DeepEqual(last, tt.last) {
@@ -146,8 +157,8 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 	tests := []struct {
 		name        string
 		str         string
-		first       string
-		last        string
+		first       []rune
+		last        []rune
 		sa          suffixarray.Suffix
 		compression int
 		wantErr     bool
@@ -155,8 +166,8 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 		{
 			name:        "abaaba",
 			str:         "abaaba",
-			first:       "aaaabb",
-			last:        "abbaaa",
+			first:       []rune("aaaabb"),
+			last:        []rune("abbaaa"),
 			compression: 2,
 			sa: func() suffixarray.Suffix {
 
@@ -174,8 +185,8 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 		{
 			name:        "abaaba",
 			str:         "abaaba",
-			first:       "aaaabb",
-			last:        "abbaaa",
+			first:       []rune("aaaabb"),
+			last:        []rune("abbaaa"),
 			compression: 3,
 			sa: func() suffixarray.Suffix {
 
@@ -198,7 +209,7 @@ func TestBwtFirstLastSampleSuffix(t *testing.T) {
 				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if first != tt.first {
+			if string(first) != string(tt.first) {
 				t.Errorf("Bwt() = %v, want %v", first, tt.first)
 			}
 			if !reflect.DeepEqual(last, tt.last) {

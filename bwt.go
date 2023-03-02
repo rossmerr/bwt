@@ -17,7 +17,7 @@ func Bwt(str string) (string, error) {
 	set := func(s, o int) {
 	}
 	last, err := bwtFirstLastSuffix(str, appendFirst, set)
-	return last, err
+	return string(last), err
 }
 
 func BwtFirstLast(str string) (string, string, error) {
@@ -31,10 +31,10 @@ func BwtFirstLast(str string) (string, string, error) {
 	set := func(s, o int) {
 	}
 	last, err := bwtFirstLastSuffix(str, appendFirst, set)
-	return string(first), last, err
+	return string(first), string(last), err
 }
 
-func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...func(*suffixarray.OptionsSuffix)) (string, string, suffixarray.Suffix, error) {
+func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...func(*suffixarray.OptionsSuffix)) ([]rune, []rune, suffixarray.Suffix, error) {
 
 	size := len(str + ext)
 
@@ -47,13 +47,14 @@ func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...
 	}
 
 	last, err := bwtFirstLastSuffix(str, appendFirst, sa.Set)
-	return string(first), string(last), sa, err
+	return first, last, sa, err
 }
 
-func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(index, value int)) (string, error) {
+func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(index, value int)) ([]rune, error) {
+
 	if strings.Contains(str, ext) {
 		err := fmt.Errorf("input string cannot contain EXT character")
-		return "", err
+		return []rune{}, err
 	}
 
 	str = str + ext
@@ -75,7 +76,7 @@ func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(in
 		set(i, s)
 	}
 
-	return string(last), nil
+	return last, nil
 }
 
 func Ibwt(str string) string {

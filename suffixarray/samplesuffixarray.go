@@ -39,7 +39,7 @@ func (s *SampleSuffixArray) walk(i, count int) int {
 	if s.Has(i) {
 		return s.get(i, count)
 	} else {
-		return s.walk(i+1, count+1)
+		return s.walk(i-1, count+1)
 	}
 }
 

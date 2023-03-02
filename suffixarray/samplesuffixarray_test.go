@@ -116,15 +116,13 @@ func TestSampleSuffixArrayEnumerate(t *testing.T) {
 			}
 
 			iterator := sa.Enumerate()
-			count := 0
 			for iterator.HasNext() {
-				i, _ := iterator.Next()
+				result, i := iterator.Next()
 
-				r := tt.sa.Get(count)
-				if !reflect.DeepEqual(r, i) {
-					t.Errorf("BwtFirstLastSuffix.Enumerate(%v) = %v, want %v", count, r, i)
+				r := tt.sa.Get(i)
+				if !reflect.DeepEqual(r, result) {
+					t.Errorf("BwtFirstLastSuffix.Enumerate(%v) = %v, want %v", i, r, result)
 				}
-				count += tt.compression
 			}
 
 		})

@@ -2,6 +2,14 @@ package suffixarray
 
 import "fmt"
 
+type SampleSuffixArray struct {
+	sa      []int
+	opts    OptionsSuffix
+	size    int
+	length  int
+	version int
+}
+
 func (s *SampleSuffixArray) Has(index int) bool {
 	if index < 0 || index >= s.Length() {
 		panic(fmt.Sprintf("index %v out of range", index))
@@ -11,21 +19,38 @@ func (s *SampleSuffixArray) Has(index int) bool {
 }
 
 func (s *SampleSuffixArray) Get(index int) int {
-	return s.walk(index, 0)
-}
-
-func (s *SampleSuffixArray) get(index, count int) int {
 	if index < 0 || index >= s.Length() {
 		panic(fmt.Sprintf("index %v out of range", index))
 	}
 
 	if index%s.opts.mod == 0 {
 		i := index / s.opts.mod
-		return s.sa[i] - count
+		return s.sa[i]
 	}
 
-	return 0
+	return -1
 }
+
+// func (s *SampleSuffixArray) get(index, count int) int {
+// 	if index < 0 || index >= s.Length() {
+// 		panic(fmt.Sprintf("index %v out of range", index))
+// 	}
+
+// 	if index%s.opts.mod == 0 {
+// 		i := index / s.opts.mod
+// 		return s.sa[i] + count
+// 	}
+
+// 	return 0
+// }
+
+// func (s *SampleSuffixArray) walk(i, count int) int {
+// 	if s.Has(i) {
+// 		return s.get(i, count)
+// 	} else {
+// 		return s.walk(i+1, count+1)
+// 	}
+// }
 
 func (s *SampleSuffixArray) Set(index, value int) {
 	if index < 0 || index >= s.Length() {
@@ -40,24 +65,8 @@ func (s *SampleSuffixArray) Set(index, value int) {
 	s.version++
 }
 
-type SampleSuffixArray struct {
-	sa      []int
-	opts    OptionsSuffix
-	size    int
-	length  int
-	version int
-}
-
 func (s *SampleSuffixArray) Length() int {
 	return s.length
-}
-
-func (s *SampleSuffixArray) walk(i, count int) int {
-	if s.Has(i) {
-		return s.get(i, count)
-	} else {
-		return s.walk(i-1, count+1)
-	}
 }
 
 func (s *SampleSuffixArray) Enumerate() SuffixIterator {
@@ -69,7 +78,7 @@ func NewSampleSuffixArrayIterator(suffix *SampleSuffixArray) *SampleSuffixArrayI
 	return &SampleSuffixArrayIterator{
 		suffix:     suffix,
 		indexStart: 0,
-		indexEnd:   suffix.Length(),
+		indexEnd:   suffix.size,
 		version:    suffix.version,
 	}
 }
@@ -90,14 +99,14 @@ func (s *SampleSuffixArrayIterator) Next() (int, int) {
 		panic("version failed")
 	}
 
-	if s.indexStart < s.suffix.Length() {
+	if s.indexStart < s.indexEnd {
 		index := s.indexStart
 		currentElement := s.suffix.Get(index)
-		s.indexStart++
+		s.indexStart += s.suffix.opts.mod
 		return currentElement, index
 	}
 
-	s.indexStart = s.suffix.Length()
+	s.indexStart = s.indexEnd
 
 	return 0, s.indexStart
 }

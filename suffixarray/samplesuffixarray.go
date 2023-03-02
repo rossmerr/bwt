@@ -19,38 +19,29 @@ func (s *SampleSuffixArray) Has(index int) bool {
 }
 
 func (s *SampleSuffixArray) Get(index int) int {
+	return s.walk(index, 0)
+}
+
+func (s *SampleSuffixArray) get(index, count int) int {
 	if index < 0 || index >= s.Length() {
 		panic(fmt.Sprintf("index %v out of range", index))
 	}
 
 	if index%s.opts.mod == 0 {
 		i := index / s.opts.mod
-		return s.sa[i]
+		return s.sa[i] + count
 	}
 
 	return -1
 }
 
-// func (s *SampleSuffixArray) get(index, count int) int {
-// 	if index < 0 || index >= s.Length() {
-// 		panic(fmt.Sprintf("index %v out of range", index))
-// 	}
-
-// 	if index%s.opts.mod == 0 {
-// 		i := index / s.opts.mod
-// 		return s.sa[i] + count
-// 	}
-
-// 	return 0
-// }
-
-// func (s *SampleSuffixArray) walk(i, count int) int {
-// 	if s.Has(i) {
-// 		return s.get(i, count)
-// 	} else {
-// 		return s.walk(i+1, count+1)
-// 	}
-// }
+func (s *SampleSuffixArray) walk(i, count int) int {
+	if s.Has(i) {
+		return s.get(i, count)
+	} else {
+		return s.walk(i+1, count+1)
+	}
+}
 
 func (s *SampleSuffixArray) Set(index, value int) {
 	if index < 0 || index >= s.Length() {

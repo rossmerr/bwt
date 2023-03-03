@@ -67,18 +67,20 @@ func (s *SampleSuffixArray) Enumerate() SuffixIterator {
 func NewSampleSuffixArrayIterator(suffix *SampleSuffixArray) *SampleSuffixArrayIterator {
 
 	return &SampleSuffixArrayIterator{
-		suffix:     suffix,
-		indexStart: 0,
-		indexEnd:   suffix.size,
-		version:    suffix.version,
+		suffix:       suffix,
+		indexStart:   0,
+		currentIndex: 0,
+		indexEnd:     suffix.size,
+		version:      suffix.version,
 	}
 }
 
 type SampleSuffixArrayIterator struct {
-	suffix     *SampleSuffixArray
-	version    int
-	indexStart int
-	indexEnd   int
+	suffix       *SampleSuffixArray
+	version      int
+	indexStart   int
+	indexEnd     int
+	currentIndex int
 }
 
 func (s *SampleSuffixArrayIterator) HasNext() bool {
@@ -91,10 +93,11 @@ func (s *SampleSuffixArrayIterator) Next() (int, int) {
 	}
 
 	if s.indexStart < s.indexEnd {
-		index := s.indexStart
-		currentElement := s.suffix.Get(index)
-		s.indexStart += s.suffix.opts.mod
-		return currentElement, index
+		currentIndex := s.currentIndex
+		currentElement := s.suffix.Get(currentIndex)
+		s.indexStart++
+		s.currentIndex += s.suffix.opts.mod
+		return currentElement, currentIndex
 	}
 
 	s.indexStart = s.indexEnd

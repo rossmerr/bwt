@@ -53,8 +53,8 @@ fmt.Println(string(last)) // abbaaa
 // You want to find the original offset of the first 'b' in the 'str'
 // 6 is the index of rune 'b' from the first column,
 //
-// you could Enumerate over 'sa' to find the index
-// and the first column of the BWT has consecutivity
+// you could range over 'first' to find the index
+// as the 'first' column of the BWT has consecutivity
 // so we would know the first 'b' must have been the first 'b' in the 'str'
 offset := sa.Get(6)
 

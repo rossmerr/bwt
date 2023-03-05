@@ -8,20 +8,48 @@ import (
 	"github.com/rossmerr/bwt/suffixarray"
 )
 
-const ext = "\003"
+// Matrix of the BWT
+func Matrix(str string, options ...func(*OptionsBwt)) ([][]rune, error) {
+	opts := buildOptions(options)
 
-func Bwt(str string) (string, error) {
+	if strings.Contains(str, opts.ext) {
+		err := fmt.Errorf("input string cannot contain EXT character")
+		return [][]rune{}, err
+	}
+
+	str = str + opts.ext
+	size := len(str)
+
+	matrix := make(matrix, size)
+
+	for i := size - 1; i >= 0; i-- {
+		matrix[i] = append([]rune(str[i:]), []rune(str[:i])...)
+	}
+	sort.Sort(&matrix)
+
+	return matrix, nil
+}
+
+// Last column of the BWT matrix
+// Optimized to only do the last rotation
+func Last(str string, options ...func(*OptionsBwt)) ([]rune, error) {
+	opts := buildOptions(options)
+
 	appendFirst := func(i int, r rune) {
 	}
 
 	set := func(s, o int) {
 	}
-	last, err := bwtFirstLastSuffix(str, appendFirst, set)
-	return string(last), err
+	last, err := firstLastSuffix(str, appendFirst, set, opts)
+	return last, err
 }
 
-func BwtFirstLast(str string) (string, string, error) {
-	size := len(str + ext)
+// First and Last column of the BWT matrix
+// Optimized to only do the last rotation
+func FirstLast(str string, options ...func(*OptionsBwt)) ([]rune, []rune, error) {
+	opts := buildOptions(options)
+
+	size := len(str + opts.ext)
 	first := make([]rune, size)
 
 	appendFirst := func(i int, r rune) {
@@ -30,15 +58,19 @@ func BwtFirstLast(str string) (string, string, error) {
 
 	set := func(s, o int) {
 	}
-	last, err := bwtFirstLastSuffix(str, appendFirst, set)
-	return string(first), string(last), err
+	last, err := firstLastSuffix(str, appendFirst, set, opts)
+	return first, last, err
 }
 
-func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...func(*suffixarray.OptionsSuffix)) ([]rune, []rune, suffixarray.Suffix, error) {
+// First and Last column of the BWT matrix with a SuffixArray
+// The SuffixArray returns the offset of the original string relative to the first column of the BWT matrix
+// Optimized to only do the last rotation
+func FirstLastSuffix(str string, options ...func(*OptionsBwt)) ([]rune, []rune, suffixarray.Suffix, error) {
+	opts := buildOptions(options)
 
-	size := len(str + ext)
+	size := len(str + opts.ext)
 
-	sa := suffixarray.NewSuffix[T](size, options...)
+	sa := suffixarray.NewSampleSuffixArray(size, opts.SampleRate())
 
 	first := make([]rune, size)
 
@@ -46,18 +78,17 @@ func BwtFirstLastSuffix[T suffixarray.SuffixConstraints](str string, options ...
 		first[i] = r
 	}
 
-	last, err := bwtFirstLastSuffix(str, appendFirst, sa.Set)
+	last, err := firstLastSuffix(str, appendFirst, sa.Set, opts)
 	return first, last, sa, err
 }
 
-func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(index, value int)) ([]rune, error) {
-
-	if strings.Contains(str, ext) {
+func firstLastSuffix(str string, appendFirst func(i int, r rune), set func(index, value int), opts *OptionsBwt) ([]rune, error) {
+	if strings.Contains(str, opts.ext) {
 		err := fmt.Errorf("input string cannot contain EXT character")
 		return []rune{}, err
 	}
 
-	str = str + ext
+	str = str + opts.ext
 	size := len(str)
 
 	suffixes := make([]string, size)
@@ -79,7 +110,10 @@ func bwtFirstLastSuffix(str string, appendFirst func(i int, r rune), set func(in
 	return last, nil
 }
 
-func Ibwt(str string) string {
+// Reverse the BWT transformation, last column of the BWT matrix back to the original text
+func Reverse(str string, options ...func(*OptionsBwt)) string {
+	opts := buildOptions(options)
+
 	size := len(str)
 	table := make([]string, size)
 	for range table {
@@ -89,9 +123,26 @@ func Ibwt(str string) string {
 		sort.Strings(table)
 	}
 	for _, row := range table {
-		if strings.HasPrefix(row, ext) {
+		if strings.HasPrefix(row, opts.ext) {
 			return row[1:]
 		}
 	}
 	return ""
+}
+
+type matrix [][]rune
+
+func (m matrix) Len() int { return len(m) }
+func (m matrix) Less(i, j int) bool {
+	for x := range m[i] {
+		if m[i][x] == m[j][x] {
+			continue
+		}
+		return m[i][x] < m[j][x]
+	}
+	return false
+}
+
+func (m matrix) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
 }

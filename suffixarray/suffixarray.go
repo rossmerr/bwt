@@ -7,6 +7,15 @@ type SuffixArray struct {
 	version int
 }
 
+func NewSuffixArray(size int) Suffix {
+
+	suffix := &SuffixArray{
+		sa: make([]int, size),
+	}
+
+	return suffix
+}
+
 func (s *SuffixArray) Get(index int) int {
 	if index < 0 || index >= s.Length() {
 		panic(fmt.Sprintf("index %v out of range", index))

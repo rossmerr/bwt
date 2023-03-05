@@ -1,6 +1,7 @@
 package bwt_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -8,7 +9,46 @@ import (
 	"github.com/rossmerr/bwt/suffixarray"
 )
 
-func TestBwt(t *testing.T) {
+func TestMatrx(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		str     string
+		want    [][]rune
+		wantErr bool
+	}{
+		{
+			name: "abaaba",
+			str:  "abaaba",
+			want: [][]rune{
+				[]rune("abaaba"),
+				[]rune("aabaab"),
+				[]rune("aabaab"),
+				[]rune("abaaba"),
+				[]rune("abaaba"),
+				[]rune("baabaa"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := bwt.Matrix(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Last() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			fmt.Println(got)
+
+			for i, row := range tt.want {
+				if string(row) != string(got[i]) {
+					t.Errorf("Last() = %v, want %v", string(got[i]), string(row))
+				}
+			}
+		})
+	}
+}
+
+func TestLast(t *testing.T) {
 
 	tests := []struct {
 		name    string
@@ -16,6 +56,11 @@ func TestBwt(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
+		{
+			name: "abaaba",
+			str:  "abaaba",
+			want: "abbaaa",
+		},
 		{
 			name: "banana",
 			str:  "banana",
@@ -29,19 +74,19 @@ func TestBwt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bwt.Bwt(tt.str)
+			got, err := bwt.Last(tt.str)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Last() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Bwt() = %v, want %v", got, tt.want)
+			if string(got) != tt.want {
+				t.Errorf("Last() = %v, want %v", string(got), tt.want)
 			}
 		})
 	}
 }
 
-func TestIbwt(t *testing.T) {
+func TestReverse(t *testing.T) {
 	tests := []struct {
 		name string
 		str  string
@@ -54,14 +99,14 @@ func TestIbwt(t *testing.T) {
 		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := bwt.Ibwt(tt.str); got != tt.want {
-				t.Errorf("Ibwt() = %v, want %v", got, tt.want)
+			if got := bwt.Reverse(tt.str); got != tt.want {
+				t.Errorf("Reverse() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestBwtFirstLast(t *testing.T) {
+func TestFirstLast(t *testing.T) {
 
 	tests := []struct {
 		name    string
@@ -85,38 +130,79 @@ func TestBwtFirstLast(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			first, last, err := bwt.BwtFirstLast(tt.str)
+			first, last, err := bwt.FirstLast(tt.str)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("FirstLast() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if first != tt.first {
-				t.Errorf("Bwt() = %v, want %v", first, tt.first)
+			if string(first) != tt.first {
+				t.Errorf("FirstLast() = %v, want %v", string(first), tt.first)
 			}
-			if last != tt.last {
-				t.Errorf("Bwt() = %v, want %v", last, tt.last)
+			if string(last) != tt.last {
+				t.Errorf("FirstLast() = %v, want %v", string(last), tt.last)
 			}
 		})
 	}
 }
 
-func TestBwtFirstLastSuffix(t *testing.T) {
+func TestFirstLastSample(t *testing.T) {
 
 	tests := []struct {
-		name    string
-		str     string
-		first   []rune
-		last    []rune
-		sa      suffixarray.Suffix
-		wantErr bool
+		name       string
+		str        string
+		first      []rune
+		last       []rune
+		sa         suffixarray.Suffix
+		sampleRate int
+		wantErr    bool
 	}{
 		{
-			name:  "abaaba",
-			str:   "abaaba",
-			first: []rune("aaaabb"),
-			last:  []rune("abbaaa"),
+			name:       "abaaba",
+			str:        "abaaba",
+			first:      []rune("aaaabb"),
+			last:       []rune("abbaaa"),
+			sampleRate: 1,
 			sa: func() suffixarray.Suffix {
-				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
+
+				sa := suffixarray.NewSampleSuffixArray(7, 1)
+				sa.Set(0, 6)
+				sa.Set(1, 5)
+				sa.Set(2, 2)
+				sa.Set(3, 3)
+				sa.Set(4, 0)
+				sa.Set(5, 4)
+				sa.Set(6, 1)
+				return sa
+			}(),
+		},
+		{
+			name:       "abaaba",
+			str:        "abaaba",
+			first:      []rune("aaaabb"),
+			last:       []rune("abbaaa"),
+			sampleRate: 2,
+			sa: func() suffixarray.Suffix {
+
+				sa := suffixarray.NewSampleSuffixArray(7, 1)
+				sa.Set(0, 6)
+				sa.Set(1, 5)
+				sa.Set(2, 2)
+				sa.Set(3, 3)
+				sa.Set(4, 0)
+				sa.Set(5, 4)
+				sa.Set(6, 1)
+				return sa
+			}(),
+		},
+		{
+			name:       "abaaba",
+			str:        "abaaba",
+			first:      []rune("aaaabb"),
+			last:       []rune("abbaaa"),
+			sampleRate: 3,
+			sa: func() suffixarray.Suffix {
+
+				sa := suffixarray.NewSampleSuffixArray(7, 1)
 				sa.Set(0, 6)
 				sa.Set(1, 5)
 				sa.Set(2, 2)
@@ -130,96 +216,23 @@ func TestBwtFirstLastSuffix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			first, last, sa, err := bwt.BwtFirstLastSuffix[suffixarray.SuffixArray](tt.str)
+			first, last, sa, err := bwt.FirstLastSuffix(tt.str, bwt.WithSampleRate(tt.sampleRate))
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("FirstLastSuffix() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if string(first) != string(tt.first) {
-				t.Errorf("Bwt() = %v, want %v", first, tt.first)
+				t.Errorf("FirstLastSuffix() = %v, want %v", first, tt.first)
 			}
 			if !reflect.DeepEqual(last, tt.last) {
-				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
+				t.Errorf("FirstLastSuffix() = %v, want %v", last, tt.last)
 			}
-			for i := 0; i < 7; i++ {
+			for i := 0; i < 7; i += tt.sampleRate {
 				r := tt.sa.Get(i)
 				result := sa.Get(i)
+
 				if !reflect.DeepEqual(r, result) {
-					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
-				}
-			}
-		})
-	}
-}
-
-func TestBwtFirstLastSampleSuffix(t *testing.T) {
-
-	tests := []struct {
-		name        string
-		str         string
-		first       []rune
-		last        []rune
-		sa          suffixarray.Suffix
-		compression int
-		wantErr     bool
-	}{
-		{
-			name:        "abaaba",
-			str:         "abaaba",
-			first:       []rune("aaaabb"),
-			last:        []rune("abbaaa"),
-			compression: 2,
-			sa: func() suffixarray.Suffix {
-
-				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
-				sa.Set(0, 6)
-				sa.Set(1, 5)
-				sa.Set(2, 2)
-				sa.Set(3, 3)
-				sa.Set(4, 0)
-				sa.Set(5, 4)
-				sa.Set(6, 1)
-				return sa
-			}(),
-		},
-		{
-			name:        "abaaba",
-			str:         "abaaba",
-			first:       []rune("aaaabb"),
-			last:        []rune("abbaaa"),
-			compression: 3,
-			sa: func() suffixarray.Suffix {
-
-				sa := suffixarray.NewSuffix[suffixarray.SuffixArray](7)
-				sa.Set(0, 6)
-				sa.Set(1, 5)
-				sa.Set(2, 2)
-				sa.Set(3, 3)
-				sa.Set(4, 0)
-				sa.Set(5, 4)
-				sa.Set(6, 1)
-				return sa
-			}(),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			first, last, sa, err := bwt.BwtFirstLastSuffix[suffixarray.SampleSuffixArray](tt.str, suffixarray.WithCompression(tt.compression))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Bwt() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if string(first) != string(tt.first) {
-				t.Errorf("Bwt() = %v, want %v", first, tt.first)
-			}
-			if !reflect.DeepEqual(last, tt.last) {
-				t.Errorf("BwtFirstLastSuffix() = %v, want %v", last, tt.last)
-			}
-			for i := 0; i < 7; i += tt.compression {
-				r := tt.sa.Get(i)
-				result := sa.Get(i)
-				if !reflect.DeepEqual(r, result) {
-					t.Errorf("BwtFirstLastSuffix() = %v, want %v", r, result)
+					t.Errorf("FirstLastSuffix() = %v, want %v", r, result)
 				}
 			}
 		})
